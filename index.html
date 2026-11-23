@@ -7,21 +7,28 @@
 <title>Number Generator</title>
 
 <style>
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #141e30, #243b55);
     font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
     color: white;
 }
 
 .container {
-    width: 90%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
     max-width: 400px;
     padding: 30px;
     background: rgba(255,255,255,0.09);
@@ -39,8 +46,8 @@ h2 {
 label {
     display: block;
     margin-bottom: 8px;
-    font-size: 14px;
     color: #d0d8e5;
+    font-size: 14px;
 }
 
 input {
@@ -52,12 +59,11 @@ input {
     background: rgba(255,255,255,0.1);
     color: white;
     font-size: 16px;
-    outline: none;
 }
 
 button {
     width: 100%;
-    padding: 14px;
+    padding: 15px;
     border: none;
     border-radius: 10px;
     background: linear-gradient(135deg, #3b82f6, #6366f1);
@@ -65,91 +71,116 @@ button {
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: 0.2s;
-}
-
-button:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
 }
 
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-}
-
-.result {
-    margin-top: 25px;
-    padding: 25px;
-    text-align: center;
-    background: rgba(0,0,0,0.2);
-    border-radius: 12px;
-}
-
-.result small { color: #b8c5d6; }
-
-#number {
-    display: block;
-    margin-top: 10px;
-    font-size: 55px;
-    font-weight: bold;
-    color: #60a5fa;
 }
 
 #status {
     margin-top: 15px;
     text-align: center;
-    font-size: 13px;
     color: #cbd5e1;
-}
-
-#settings {
-    transition: opacity 0.3s ease;
+    font-size: 14px;
 }
 
 .hidden {
-    display: none;
+    display: none !important;
+}
+
+/* FULL SCREEN RESULT */
+#resultScreen {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+#number {
+    font-size: clamp(120px, 35vw, 400px);
+    font-weight: 900;
+    line-height: 1;
+    color: #60a5fa;
+    text-shadow: 0 0 50px rgba(96,165,250,0.4);
+    text-align: center;
+    animation: appear 0.6s ease;
+}
+
+.result-label {
+    font-size: 18px;
+    letter-spacing: 5px;
+    color: #cbd5e1;
+    margin-bottom: 30px;
 }
 
 #againBtn {
-    margin-top: 15px;
-    background: linear-gradient(135deg, #059669, #10b981);
+    position: absolute;
+    bottom: 35px;
+    width: auto;
+    min-width: 200px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="container" id="settingsScreen">
+    <div class="card">
 
-    <h2>🎲 Number Generator</h2>
+        <h2>🎲 Number Generator</h2>
 
-    <div id="settings">
+        <div id="settings">
 
-        <label for="min">Minimum Number</label>
-        <input type="number" id="min" min="0" max="100" value="0">
+            <label for="min">Minimum Number</label>
+            <input type="number" id="min" min="0" max="100" value="0">
 
-        <label for="max">Maximum Number</label>
-        <input type="number" id="max" min="0" max="100" value="100">
+            <label for="max">Maximum Number</label>
+            <input type="number" id="max" min="0" max="100" value="100">
 
-        <label for="delay">Delay (seconds)</label>
-        <input type="number" id="delay" min="0" value="5" step="1">
+            <label for="delay">Delay (seconds)</label>
+            <input type="number" id="delay" min="0" value="5" step="1">
 
-        <button id="generateBtn" onclick="generateNumber()">
-            Generate Number
-        </button>
+            <button id="generateBtn" onclick="generateNumber()">
+                Generate Number
+            </button>
 
+        </div>
+
+        <div id="status">Ready to generate</div>
     </div>
+</div>
 
-    <div class="result">
-        <small>GENERATED NUMBER</small>
-        <span id="number">--</span>
-    </div>
+<!-- FULL SCREEN RESULT -->
+<div id="resultScreen" class="hidden">
 
-    <div id="status">Ready to generate</div>
+    <div class="result-label">YOUR NUMBER</div>
 
-    <button id="againBtn" class="hidden" onclick="resetGenerator()">
+    <div id="number">--</div>
+
+    <div id="statusResult"></div>
+
+    <button id="againBtn" onclick="resetGenerator()">
         ↻ Generate Again
     </button>
 
@@ -167,10 +198,6 @@ function generateNumber() {
     const max = Number(maxInput.value);
     const delay = Number(delayInput.value);
 
-    const status = document.getElementById("status");
-    const result = document.getElementById("number");
-    const button = document.getElementById("generateBtn");
-
     if (
         minInput.value === "" ||
         maxInput.value === "" ||
@@ -185,16 +212,17 @@ function generateNumber() {
         return;
     }
 
-    clearInterval(timer);
+    const button = document.getElementById("generateBtn");
+    const status = document.getElementById("status");
+
     button.disabled = true;
-    result.textContent = "--";
 
     let remaining = delay;
 
     status.textContent = `Generating in ${remaining} seconds...`;
 
     if (remaining === 0) {
-        finish();
+        finish(min, max);
         return;
     }
 
@@ -206,34 +234,32 @@ function generateNumber() {
                 `Generating in ${remaining} seconds...`;
         } else {
             clearInterval(timer);
-            finish();
+            finish(min, max);
         }
     }, 1000);
+}
 
-    function finish() {
-        const random = Math.floor(
-            Math.random() * (max - min + 1)
-        ) + min;
+function finish(min, max) {
+    const random = Math.floor(
+        Math.random() * (max - min + 1)
+    ) + min;
 
-        result.textContent = random;
-        status.textContent = "Generation complete!";
+    document.getElementById("number").textContent = random;
 
-        // Hide settings after generating
-        document.getElementById("settings").classList.add("hidden");
+    document.getElementById("settingsScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
 
-        // Show generate again button
-        document.getElementById("againBtn").classList.remove("hidden");
-    }
+    document.getElementById("statusResult").textContent =
+        "Generation complete!";
 }
 
 function resetGenerator() {
     clearInterval(timer);
 
-    document.getElementById("settings").classList.remove("hidden");
-    document.getElementById("againBtn").classList.add("hidden");
-    document.getElementById("generateBtn").disabled = false;
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("settingsScreen").classList.remove("hidden");
 
-    document.getElementById("number").textContent = "--";
+    document.getElementById("generateBtn").disabled = false;
     document.getElementById("status").textContent = "Ready to generate";
 }
 </script>
