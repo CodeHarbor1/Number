@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Generator</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.container {
+    width: 90%;
+    max-width: 400px;
+    padding: 30px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #d0d8e5;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.result {
+    margin-top: 25px;
+    padding: 25px;
+    text-align: center;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+}
+
+.result small { color: #b8c5d6; }
+
+#number {
+    display: block;
+    margin-top: 10px;
+    font-size: 55px;
+    font-weight: bold;
+    color: #60a5fa;
+}
+
+#status {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 13px;
+    color: #cbd5e1;
+}
+
+#settings {
+    transition: opacity 0.3s ease;
+}
+
+.hidden {
+    display: none;
+}
+
+#againBtn {
+    margin-top: 15px;
+    background: linear-gradient(135deg, #059669, #10b981);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>🎲 Number Generator</h2>
+
+    <div id="settings">
+
+        <label for="min">Minimum Number</label>
+        <input type="number" id="min" min="0" max="100" value="0">
+
+        <label for="max">Maximum Number</label>
+        <input type="number" id="max" min="0" max="100" value="100">
+
+        <label for="delay">Delay (seconds)</label>
+        <input type="number" id="delay" min="0" value="5" step="1">
+
+        <button id="generateBtn" onclick="generateNumber()">
+            Generate Number
+        </button>
+
+    </div>
+
+    <div class="result">
+        <small>GENERATED NUMBER</small>
+        <span id="number">--</span>
+    </div>
+
+    <div id="status">Ready to generate</div>
+
+    <button id="againBtn" class="hidden" onclick="resetGenerator()">
+        ↻ Generate Again
+    </button>
+
+</div>
+
+<script>
+let timer;
+
+function generateNumber() {
+    const minInput = document.getElementById("min");
+    const maxInput = document.getElementById("max");
+    const delayInput = document.getElementById("delay");
+
+    const min = Number(minInput.value);
+    const max = Number(maxInput.value);
+    const delay = Number(delayInput.value);
+
+    const status = document.getElementById("status");
+    const result = document.getElementById("number");
+    const button = document.getElementById("generateBtn");
+
+    if (
+        minInput.value === "" ||
+        maxInput.value === "" ||
+        delayInput.value === "" ||
+        !Number.isInteger(min) ||
+        !Number.isInteger(max) ||
+        !Number.isInteger(delay) ||
+        min < 0 || max > 100 ||
+        min > max || delay < 0
+    ) {
+        alert("Please enter valid values.");
+        return;
+    }
+
+    clearInterval(timer);
+    button.disabled = true;
+    result.textContent = "--";
+
+    let remaining = delay;
+
+    status.textContent = `Generating in ${remaining} seconds...`;
+
+    if (remaining === 0) {
+        finish();
+        return;
+    }
+
+    timer = setInterval(() => {
+        remaining--;
+
+        if (remaining > 0) {
+            status.textContent =
+                `Generating in ${remaining} seconds...`;
+        } else {
+            clearInterval(timer);
+            finish();
+        }
+    }, 1000);
+
+    function finish() {
+        const random = Math.floor(
+            Math.random() * (max - min + 1)
+        ) + min;
+
+        result.textContent = random;
+        status.textContent = "Generation complete!";
+
+        // Hide settings after generating
+        document.getElementById("settings").classList.add("hidden");
+
+        // Show generate again button
+        document.getElementById("againBtn").classList.remove("hidden");
+    }
+}
+
+function resetGenerator() {
+    clearInterval(timer);
+
+    document.getElementById("settings").classList.remove("hidden");
+    document.getElementById("againBtn").classList.add("hidden");
+    document.getElementById("generateBtn").disabled = false;
+
+    document.getElementById("number").textContent = "--";
+    document.getElementById("status").textContent = "Ready to generate";
+}
+</script>
+
+</body>
+</html>
