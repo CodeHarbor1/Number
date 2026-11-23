@@ -59,6 +59,11 @@ input {
     background: rgba(255,255,255,0.1);
     color: white;
     font-size: 16px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #60a5fa;
 }
 
 button {
@@ -71,6 +76,11 @@ button {
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    filter: brightness(1.15);
 }
 
 button:disabled {
@@ -97,7 +107,6 @@ button:disabled {
     height: 100%;
     background: linear-gradient(135deg, #141e30, #243b55);
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 100;
@@ -112,13 +121,6 @@ button:disabled {
     text-shadow: 0 0 50px rgba(96,165,250,0.4);
     text-align: center;
     animation: appear 0.6s ease;
-}
-
-.result-label {
-    font-size: 18px;
-    letter-spacing: 5px;
-    color: #cbd5e1;
-    margin-bottom: 30px;
 }
 
 #againBtn {
@@ -145,6 +147,7 @@ button:disabled {
 
 <body>
 
+<!-- SETTINGS SCREEN -->
 <div class="container" id="settingsScreen">
     <div class="card">
 
@@ -168,17 +171,14 @@ button:disabled {
         </div>
 
         <div id="status">Ready to generate</div>
+
     </div>
 </div>
 
-<!-- FULL SCREEN RESULT -->
+<!-- FULL SCREEN NUMBER -->
 <div id="resultScreen" class="hidden">
 
-    <div class="result-label">YOUR NUMBER</div>
-
     <div id="number">--</div>
-
-    <div id="statusResult"></div>
 
     <button id="againBtn" onclick="resetGenerator()">
         ↻ Generate Again
@@ -205,8 +205,10 @@ function generateNumber() {
         !Number.isInteger(min) ||
         !Number.isInteger(max) ||
         !Number.isInteger(delay) ||
-        min < 0 || max > 100 ||
-        min > max || delay < 0
+        min < 0 ||
+        max > 100 ||
+        min > max ||
+        delay < 0
     ) {
         alert("Please enter valid values.");
         return;
@@ -248,9 +250,6 @@ function finish(min, max) {
 
     document.getElementById("settingsScreen").classList.add("hidden");
     document.getElementById("resultScreen").classList.remove("hidden");
-
-    document.getElementById("statusResult").textContent =
-        "Generation complete!";
 }
 
 function resetGenerator() {
@@ -261,6 +260,7 @@ function resetGenerator() {
 
     document.getElementById("generateBtn").disabled = false;
     document.getElementById("status").textContent = "Ready to generate";
+    document.getElementById("number").textContent = "--";
 }
 </script>
 
