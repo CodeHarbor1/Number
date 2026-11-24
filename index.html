@@ -107,6 +107,7 @@ button:disabled {
     height: 100%;
     background: linear-gradient(135deg, #141e30, #243b55);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 100;
@@ -123,13 +124,35 @@ button:disabled {
     animation: appear 0.6s ease;
 }
 
+#rangeInfo {
+    margin-top: 25px;
+    color: #cbd5e1;
+    font-size: 15px;
+    text-align: center;
+    line-height: 1.8;
+}
+
+#quickBtn {
+    position: absolute;
+    bottom: 105px;
+    width: auto;
+    min-width: 220px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+}
+
 #againBtn {
     position: absolute;
     bottom: 35px;
     width: auto;
-    min-width: 200px;
+    min-width: 220px;
     background: rgba(255,255,255,0.12);
     border: 1px solid rgba(255,255,255,0.25);
+}
+
+#resultStatus {
+    margin-top: 15px;
+    color: #cbd5e1;
+    font-size: 15px;
 }
 
 @keyframes appear {
@@ -175,19 +198,31 @@ button:disabled {
     </div>
 </div>
 
-<!-- FULL SCREEN NUMBER -->
+<!-- FULL SCREEN RESULT -->
 <div id="resultScreen" class="hidden">
 
     <div id="number">--</div>
 
+    <div id="rangeInfo"></div>
+
+    <div id="resultStatus"></div>
+
+    <button id="quickBtn" onclick="quickGenerate()">
+        ⚡ Quick Re-generate
+    </button>
+
     <button id="againBtn" onclick="resetGenerator()">
-        ↻ Generate Again
+        ↻ Change Settings
     </button>
 
 </div>
 
 <script>
+
 let timer;
+let savedMin;
+let savedMax;
+let savedDelay;
 
 function generateNumber() {
 
@@ -214,14 +249,53 @@ function generateNumber() {
         return;
     }
 
-    const button = document.getElementById("generateBtn");
-    const status = document.getElementById("status");
+    // SAVE SETTINGS
+    savedMin = min;
+    savedMax = max;
+    savedDelay = delay;
 
-    button.disabled = true;
+    document.getElementById("generateBtn").disabled = true;
+
+    document.getElementById("rangeInfo").textContent =
+        `Minimum: ${savedMin} | Maximum: ${savedMax} | Delay: ${savedDelay}s`;
+
+    startGeneration(savedMin, savedMax, savedDelay, false);
+}
+
+// QUICK RE-GENERATE
+function quickGenerate() {
+
+    if (savedMin === undefined) return;
+
+    startGeneration(savedMin, savedMax, savedDelay, true);
+}
+
+// GENERATION FUNCTION
+function startGeneration(min, max, delay, quick) {
+
+    clearInterval(timer);
+
+    const numberDisplay = document.getElementById("number");
+    const status = document.getElementById("status");
+    const resultStatus = document.getElementById("resultStatus");
+    const quickBtn = document.getElementById("quickBtn");
+
+    quickBtn.disabled = true;
 
     let remaining = delay;
 
-    status.textContent = `Generating in ${remaining} seconds...`;
+    if (quick) {
+        numberDisplay.textContent = "...";
+        numberDisplay.style.animation = "none";
+    }
+
+    if (quick) {
+        resultStatus.textContent =
+            `Generating in ${remaining} seconds...`;
+    } else {
+        status.textContent =
+            `Generating in ${remaining} seconds...`;
+    }
 
     if (remaining === 0) {
         finish(min, max);
@@ -232,10 +306,17 @@ function generateNumber() {
 
         remaining--;
 
-        if (remaining > 0) {
-            status.textContent =
-                `Generating in ${remaining} seconds...`;
+        const message = remaining > 0
+            ? `Generating in ${remaining} seconds...`
+            : "Generating...";
+
+        if (quick) {
+            resultStatus.textContent = message;
         } else {
+            status.textContent = message;
+        }
+
+        if (remaining <= 0) {
             clearInterval(timer);
             finish(min, max);
         }
@@ -243,18 +324,30 @@ function generateNumber() {
     }, 1000);
 }
 
+// FINISH GENERATION
 function finish(min, max) {
 
     const random = Math.floor(
         Math.random() * (max - min + 1)
     ) + min;
 
-    document.getElementById("number").textContent = random;
+    const numberDisplay = document.getElementById("number");
+
+    numberDisplay.style.animation = "none";
+    numberDisplay.textContent = random;
+
+    // Restart animation
+    void numberDisplay.offsetWidth;
+    numberDisplay.style.animation = "appear 0.6s ease";
 
     document.getElementById("settingsScreen").classList.add("hidden");
     document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("quickBtn").disabled = false;
+    document.getElementById("resultStatus").textContent = "";
 }
 
+// RETURN TO SETTINGS
 function resetGenerator() {
 
     clearInterval(timer);
@@ -263,7 +356,10 @@ function resetGenerator() {
     document.getElementById("settingsScreen").classList.remove("hidden");
 
     document.getElementById("generateBtn").disabled = false;
+    document.getElementById("quickBtn").disabled = false;
+
     document.getElementById("status").textContent = "Ready to generate";
+    document.getElementById("resultStatus").textContent = "";
     document.getElementById("number").textContent = "--";
 }
 
