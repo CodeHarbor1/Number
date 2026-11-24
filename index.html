@@ -43,11 +43,13 @@ h2 {
     margin-bottom: 25px;
 }
 
+
 label {
     display: block;
     margin-bottom: 8px;
     color: #d0d8e5;
     font-size: 14px;
+    text-align: center;
 }
 
 .input-group {
@@ -121,6 +123,7 @@ button:disabled {
     color: #cbd5e1;
     font-size: 14px;
 }
+
 
 .hidden {
     display: none !important;
@@ -262,13 +265,11 @@ button:disabled {
 
 <div id="resultScreen" class="hidden">
 
-    <div id="number">--</div>
-
     <div id="rangeInfo"></div>
 
-    <div id="resultStatus"></div>
+    <div id="number">--</div>
 
-    <!-- TWO COLUMN BUTTONS -->
+    <div id="resultStatus"></div>
 
     <div class="result-buttons">
 
@@ -283,7 +284,6 @@ button:disabled {
     </div>
 
 </div>
-
 <script>
 
 let timer;
