@@ -75,20 +75,14 @@ input:focus {
 }
 
 .step-btn {
-    flex-shrink: 0;
-    width: 45px;
-    padding: 0;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 10px;
-    background: rgba(255,255,255,0.12);
-    color: white;
-    font-size: 20px;
-    font-weight: bold;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    min-width: 45px;
+    padding: 0 15px;
+    background: rgba(255,255,255,0.15);
+    font-size: 22px;
     cursor: pointer;
-}
-
-.step-btn:hover {
-    background: rgba(255,255,255,0.25);
 }
 
 button {
@@ -459,8 +453,65 @@ function resetGenerator() {
     document.getElementById("resultStatus").textContent = "";
     document.getElementById("number").textContent = "--";
 }
+let holdTimer;
+let repeatTimer;
 
+function startHold(id, amount) {
+
+    clearTimeout(holdTimer);
+    clearInterval(repeatTimer);
+
+    // Change once immediately
+    changeValue(id, amount);
+
+    // Start repeating after 400ms
+    holdTimer = setTimeout(() => {
+
+        repeatTimer = setInterval(() => {
+            changeValue(id, amount);
+        }, 80);
+
+    }, 400);
+}
+
+function stopHold() {
+
+    clearTimeout(holdTimer);
+    clearInterval(repeatTimer);
+
+    holdTimer = null;
+    repeatTimer = null;
+}
+
+// Attach events to all step buttons
+
+document.querySelectorAll(".step-btn").forEach(button => {
+
+    const onclick = button.getAttribute("onclick");
+
+    const match = onclick.match(/changeValue\('([^']+)',\s*(-?\d+)\)/);
+
+    if (!match) return;
+
+    const id = match[1];
+    const amount = Number(match[2]);
+
+    button.removeAttribute("onclick");
+
+    button.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        button.setPointerCapture(event.pointerId);
+        startHold(id, amount);
+    });
+
+    button.addEventListener("pointerup", stopHold);
+    button.addEventListener("pointercancel", stopHold);
+    button.addEventListener("lostpointercapture", stopHold);
+
+});
 </script>
 
 </body>
 </html>
+
+
